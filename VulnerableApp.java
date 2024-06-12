@@ -1,30 +1,16 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import sqlite3
 
-public class VulnerableApp {
-    public static void main(String[] args) {
-        String user = args[0]; // User input should be sanitized
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+def get_user_info(username):
+    conn = sqlite3.connect('example.db')
+    cursor = conn.cursor()
+    # Vulnerable to SQL Injection
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    conn.close()
+    return result
 
-        try {
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/test?user=root&password=root");
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM users WHERE username = '" + user + "'"); // Vulnerable to SQL Injection
-
-            while (rs.next()) {
-                System.out.println("User: " + rs.getString("username"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try { if (rs != null) rs.close(); } catch (Exception e) {};
-            try { if (stmt != null) stmt.close(); } catch (Exception e) {};
-            try { if (conn != null) conn.close(); } catch (Exception e) {};
-        }
-    }
-}
+if __name__ == "__main__":
+    import sys
+    user_input = sys.argv[1]
+    print(get_user_info(user_input))
