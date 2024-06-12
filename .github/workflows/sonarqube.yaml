@@ -13,14 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up JDK 17 for SonarQube
-        uses: actions/setup-java@v1
-        with:
-          java-version: '17'
-          distribution: 'adopt'
 
       - uses: actions/checkout@v4
         with:
@@ -30,15 +22,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SQ_URL }}
 
-      - name: Run SonarQube scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=AccuKnox-Sonarqube-Usecase \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=${{ secrets.SQ_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           
       - name: Run AccuKnox SAST job
         env:
