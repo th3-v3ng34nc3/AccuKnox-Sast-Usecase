@@ -22,28 +22,11 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Cache SonarQube packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Install SonarQube scanner
-        run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner.zip
-          export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin
-
-      - name: Run SonarQube scan
+      - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=AccuKnox-Sonarqube-Usecase \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=${{ secrets.SQ_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SQ_URL }}
+          
       - name: Run AccuKnox SAST job
         env:
           SQ_URL: ${{ secrets.SQ_URL }}
