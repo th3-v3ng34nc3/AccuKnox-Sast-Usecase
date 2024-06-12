@@ -31,7 +31,7 @@ jobs:
             -e SQ_URL=${{ secrets.SQ_URL }} \
             -e SQ_AUTH_TOKEN=${{ secrets.SONAR_TOKEN }} \
             -e REPORT_PATH=/app/data/ \
-            -e SQ_PROJECTS="^github_sonar_example$" \
+            -e SQ_PROJECTS="^AccuKnox-Sonarqube-Usecase$" \
             -v $PWD:/app/data/ \
             accuknox/sastjob:latest
 
