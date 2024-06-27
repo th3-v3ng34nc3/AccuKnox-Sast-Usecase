@@ -5,7 +5,7 @@ steps:
       - '-c'
       - |
         sonar-scanner -X \
-          -Dsonar.projectKey=$PROJECT_ID \
+          -Dsonar.projectKey=AccuKnox-Sonarqube-Usecase \
           -Dsonar.sources=. \
           -Dsonar.host.url=$_SONAR_HOST_URL \
           -Dsonar.login=$_SONAR_LOGIN
