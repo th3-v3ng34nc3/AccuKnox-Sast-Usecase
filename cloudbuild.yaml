@@ -26,14 +26,15 @@ steps:
     args:
       - '-c'
       - |
-        apt update && apt-get install docker.io -y && docker run --rm \
-          -u $(id -u):$(id -g) \  # Run as the current user
-          -e SQ_URL=$_SONAR_HOST_URL \
-          -e SQ_AUTH_TOKEN=$_SONAR_LOGIN \
-          -e REPORT_PATH=/app/data/ \
+        apt update && apt-get install -y docker.io && docker run --rm \
+          -u $(id -u):$(id -g) \
+          -e SQ_URL="$_SONAR_HOST_URL" \
+          -e SQ_AUTH_TOKEN="$_SONAR_LOGIN" \
+          -e REPORT_PATH="/app/data/" \
           -e SQ_PROJECTS="^$PROJECT_ID$" \
-          -v $(pwd):/app/data/ \
+          -v "$(pwd)":/app/data/ \
           accuknox/sastjob:latest
+
 
 
   # Step 4: Upload generated files to Artifact Knowledge
