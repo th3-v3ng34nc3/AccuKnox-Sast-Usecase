@@ -1,4 +1,14 @@
 steps:
+  # Step 1: Check Docker permissions and add user to docker group if necessary
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        id
+        sudo usermod -aG docker $(whoami) || true  # Add user to docker group (ignore if already added)
+
+  # Step 2: Run SonarQube scanner
   - name: 'docker.io/sonarsource/sonar-scanner-cli'
     entrypoint: '/bin/sh'
     args:
@@ -10,12 +20,14 @@ steps:
           -Dsonar.host.url=$_SONAR_HOST_URL \
           -Dsonar.login=$_SONAR_LOGIN
 
+  # Step 3: Run SAST job in Docker container
   - name: 'docker.io/accuknox/sastjob:latest'
     entrypoint: '/bin/sh'
     args:
       - '-c'
       - |
         docker run --rm \
+          -u $(id -u):$(id -g) \  # Run as the current user
           -e SQ_URL=$_SONAR_HOST_URL \
           -e SQ_AUTH_TOKEN=$_SONAR_LOGIN \
           -e REPORT_PATH=/app/data/ \
@@ -23,12 +35,14 @@ steps:
           -v $(pwd):/app/data/ \
           accuknox/sastjob:latest
 
+  # Step 4: Upload generated files to Artifact Knowledge
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
       - '-c'
       - |
         for file in $(ls -1 SQ-*.json); do
+          chmod +rw "$file"  # Adjust file permissions if needed
           curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
             --header "Tenant-Id: $_TENANT_ID" \
             --header "Authorization: Bearer $_AK_TOK" \
