@@ -19,8 +19,8 @@ steps:
           -Dsonar.sources=. \
           -Dsonar.host.url=$_SONAR_HOST_URL \
           -Dsonar.login=$_SONAR_LOGIN
-          -Dsonar.issuesReport.json.enable=true \  # Enable JSON report generation
-          -Dsonar.report.export.path=/workspace/sonar-report.json  # Specify JSON report path
+          '-Dsonar.issuesReport.json.enable=true' \
+          '-Dsonar.report.export.path=/workspace/sonar-report.json' # Specify JSON report path
   # Step 3: Run SAST job in Docker container
   - name: 'docker.io/accuknox/sastjob:latest'
     entrypoint: '/bin/sh'
