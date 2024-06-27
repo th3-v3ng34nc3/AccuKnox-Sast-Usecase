@@ -42,16 +42,10 @@ steps:
     args:
       - '-c'
       - |
-        files=$(ls sonar-*.json 2>/dev/null)  # Suppress error output if no files found
-        if [ -z "$files" ]; then
-          echo "No files matching SQ-*.json found."
-        else
-          for file in $files; do
-            chmod +rw "$file"  # Adjust file permissions if needed
-            curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
-              --header "Tenant-Id: $_TENANT_ID" \
-              --header "Authorization: Bearer $_AK_TOK" \
-              --form "file=@\"$file\""
+        curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
+          --header "Tenant-Id: $_TENANT_ID" \
+          --header "Authorization: Bearer $_AK_TOK" \
+          --form "file=@/workspace/sonar-report.json"
           done
         fi
 
