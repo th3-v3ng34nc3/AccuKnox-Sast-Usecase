@@ -6,7 +6,7 @@ steps:
       - '-c'
       - |
         id
-        sudo usermod -aG docker $(whoami) || true  # Add user to docker group (ignore if already added)
+        sudo usermod -aG docker $(whoami) || true && chmod -R 777 /workspace # Add user to docker group (ignore if already added)
 
   # Step 2: Run SonarQube scanner
   - name: 'docker.io/sonarsource/sonar-scanner-cli'
