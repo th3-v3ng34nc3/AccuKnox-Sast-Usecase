@@ -35,6 +35,7 @@ steps:
           -v $(pwd):/app/data/ \
           accuknox/sastjob:latest
 
+
   # Step 4: Upload generated files to Artifact Knowledge
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
