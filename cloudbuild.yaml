@@ -35,13 +35,10 @@ steps:
             --form "file=@\"$file\""
         done
 
-options:
-  logging: {logsbucket}
-
 substitutions:
   _SONAR_HOST_URL: "https://sq.accuknox.com/"
   _SONAR_LOGIN: "squ_06875b545b725b69aca1a7f63cd254892c1a06ca"
   _AK_URL: "https://cspm.demo.accuknox.com"
   _TENANT_ID: "167"
   _AK_TOK: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIwMzY4MTAwLCJqdGkiOiJhYzg0YjliYTgxNDE0NDk2YTQ2N2MyMDQzMzhhNmU5OCIsImlzcyI6ImNzcG0uZGVtby5hY2N1a25veC5jb20ifQ.OKrmduSHXWwH9t7edRnW4S--qccsZP-SY_8p97Z7Rvi-Rrn_OIGz0f8cJjuXXMkyAfKsEgviW5czxuBolz23oNUKZBlpYKoxe-ghMgMz3__-Zizw-izKii4WyFb3IcoLi0VMNh_HRxlxNN_-8DujXagFUQwgLTGmNz_zx_5aiMA1BFUnAYrjlrRL6q64_cJzPT6ip9I7tDDEWXgwJlVbtAlQvsqZxJVd39Lo4oK04Rwc5ehTz_lbw7_0VIgQkRCeiUhfKZj3OF4ie2sMfJm6BNtIP8wap_Nj-ORIRLyxeh84bBC7S_XTtgjkToEDJLSEd9BpLvLPcM8JqBSqx2Pa0Q"
-  logsbucket: "gs://aditya-cicd-test"
+logsbucket: "gs://aditya-cicd-test"
