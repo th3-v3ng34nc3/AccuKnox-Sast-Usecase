@@ -42,7 +42,7 @@ steps:
     args:
       - '-c'
       - |
-        files=$(ls SQ-*.json 2>/dev/null)  # Suppress error output if no files found
+        files=$(ls sonar-*.json 2>/dev/null)  # Suppress error output if no files found
         if [ -z "$files" ]; then
           echo "No files matching SQ-*.json found."
         else
