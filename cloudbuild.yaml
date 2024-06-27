@@ -4,7 +4,7 @@ steps:
     args:
       - '-c'
       - |
-        sudo chmod -R 777 /workspace && sonar-scanner -X \
+        sonar-scanner -X \
           -Dsonar.projectKey=$PROJECT_ID \
           -Dsonar.sources=. \
           -Dsonar.host.url=$_SONAR_HOST_URL \
