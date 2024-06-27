@@ -1,0 +1,47 @@
+steps:
+  - name: 'docker.io/sonarsource/sonar-scanner-cli'
+    entrypoint: '/bin/sh'
+    args:
+      - '-c'
+      - |
+        sonar-scanner \
+          -Dsonar.projectKey=$PROJECT_ID \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$_SONAR_HOST_URL \
+          -Dsonar.login=$_SONAR_LOGIN
+
+  - name: 'docker.io/accuknox/sastjob:latest'
+    entrypoint: '/bin/sh'
+    args:
+      - '-c'
+      - |
+        docker run --rm \
+          -e SQ_URL=$_SONAR_HOST_URL \
+          -e SQ_AUTH_TOKEN=$_SONAR_LOGIN \
+          -e REPORT_PATH=/app/data/ \
+          -e SQ_PROJECTS="^$PROJECT_ID$" \
+          -v $(pwd):/app/data/ \
+          accuknox/sastjob:latest
+
+  - name: 'gcr.io/cloud-builders/curl'
+    entrypoint: '/bin/sh'
+    args:
+      - '-c'
+      - |
+        for file in $(ls -1 SQ-*.json); do
+          curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
+            --header "Tenant-Id: $_TENANT_ID" \
+            --header "Authorization: Bearer $_AK_TOK" \
+            --form "file=@\"$file\""
+        done
+
+options:
+  logging: {logsbucket}
+
+substitutions:
+  _SONAR_HOST_URL: "https://sq.accuknox.com/"
+  _SONAR_LOGIN: "squ_06875b545b725b69aca1a7f63cd254892c1a06ca"
+  _AK_URL: "https://cspm.demo.accuknox.com"
+  _TENANT_ID: "167"
+  _AK_TOK: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIwMzY4MTAwLCJqdGkiOiJhYzg0YjliYTgxNDE0NDk2YTQ2N2MyMDQzMzhhNmU5OCIsImlzcyI6ImNzcG0uZGVtby5hY2N1a25veC5jb20ifQ.OKrmduSHXWwH9t7edRnW4S--qccsZP-SY_8p97Z7Rvi-Rrn_OIGz0f8cJjuXXMkyAfKsEgviW5czxuBolz23oNUKZBlpYKoxe-ghMgMz3__-Zizw-izKii4WyFb3IcoLi0VMNh_HRxlxNN_-8DujXagFUQwgLTGmNz_zx_5aiMA1BFUnAYrjlrRL6q64_cJzPT6ip9I7tDDEWXgwJlVbtAlQvsqZxJVd39Lo4oK04Rwc5ehTz_lbw7_0VIgQkRCeiUhfKZj3OF4ie2sMfJm6BNtIP8wap_Nj-ORIRLyxeh84bBC7S_XTtgjkToEDJLSEd9BpLvLPcM8JqBSqx2Pa0Q"
+  logsbucket: "gs://aditya-cicd-test"
