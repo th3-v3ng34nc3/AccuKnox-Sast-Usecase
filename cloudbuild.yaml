@@ -23,7 +23,7 @@ steps:
     args:
       - '-c'
       - |
-        docker run --rm \
+        apt update && apt-get install -y docker.io && docker run --rm \
           -e SQ_URL=$_SONAR_HOST_URL \
           -e SQ_AUTH_TOKEN=$_SONAR_LOGIN \
           -e REPORT_PATH=/app/data/ \
