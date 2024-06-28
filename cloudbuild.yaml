@@ -19,7 +19,7 @@ steps:
           -e SQ_URL=$_SONAR_HOST_URL \
           -e SQ_AUTH_TOKEN=$_SONAR_LOGIN \
           -e REPORT_PATH=/app/data/ \
-          -e SQ_PROJECTS="^$PROJECT_ID$" \
+          -e SQ_PROJECTS="^AccuKnox-Sonarqube-Usecase$" \
           -v $(pwd):/app/data/ \
           accuknox/sastjob:latest
 
