@@ -1,4 +1,12 @@
 steps:
+    # Step 1: Check Docker permissions and add user to docker group if necessary
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        id
+        usermod -aG docker $(whoami) || true && chmod -R 777 /workspace # Add user to docker group (ignore if already added)
   - name: 'docker.io/sonarsource/sonar-scanner-cli'
     entrypoint: '/bin/sh'
     args:
