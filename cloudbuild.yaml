@@ -37,7 +37,7 @@ steps:
       - '-c'
       - |
         for file in $(ls -1 SQ-*.json); do
-          curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
+          curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=167&data_type=SQ&save_to_s3=false" \
             --header "Tenant-Id: $_TENANT_ID" \
             --header "Authorization: Bearer $_AK_TOK" \
             --form "file=@\"$file\""
