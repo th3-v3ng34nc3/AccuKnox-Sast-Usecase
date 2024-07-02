@@ -13,7 +13,7 @@ steps:
       '-c', 
       "gcloud secrets versions access latest --secret=sonarqube-token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/sonar-token.txt" 
     ]
-    id: 'access-secret'
+    id: 'access-sonar-secret'
   - name: 'docker.io/sonarsource/sonar-scanner-cli'
     entrypoint: '/bin/sh'
     args:
@@ -44,7 +44,7 @@ steps:
       '-c', 
       "gcloud secrets versions access latest --secret=accuknox_token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/ak-token.txt" 
     ]
-    id: 'access-secret'
+    id: 'access-ak-secret'
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
