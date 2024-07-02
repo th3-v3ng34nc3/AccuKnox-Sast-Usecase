@@ -1,5 +1,5 @@
 steps:
-  # Step 1: Check Docker permissions and add user to docker group if necessary
+    # Step 1: Check Docker permissions and add user to docker group if necessary
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
@@ -7,8 +7,13 @@ steps:
       - |
         id
         usermod -aG docker $(whoami) || true && chmod -R 777 /workspace # Add user to docker group (ignore if already added)
-
-  # Step 2: Run SonarQube scanner
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args: [ 
+      '-c', 
+      "gcloud secrets versions access latest --secret=sonarqube-token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/sonar-token.txt" 
+    ]
+    id: 'access-secret'
   - name: 'docker.io/sonarsource/sonar-scanner-cli'
     entrypoint: '/bin/sh'
     args:
@@ -18,41 +23,42 @@ steps:
           -Dsonar.projectKey=AccuKnox-Sonarqube-Usecase \
           -Dsonar.sources=. \
           -Dsonar.host.url=$_SONAR_HOST_URL \
-          -Dsonar.login=$_SONAR_LOGIN \
-          '-Dsonar.issuesReport.json.enable=true' \
-          '-Dsonar.report.export.path=/workspace/sonar-report.json' # Specify JSON report path
-  # Step 3: Run SAST job in Docker container
+          -Dsonar.login=$(cat /workspace/sonar-token.txt)
+
   - name: 'docker.io/accuknox/sastjob:latest'
     entrypoint: '/bin/sh'
     args:
       - '-c'
       - |
         apt update && apt-get install -y docker.io && docker run --rm \
-          -u $(id -u):$(id -g) \
-          -e SQ_URL="$_SONAR_HOST_URL" \
-          -e SQ_AUTH_TOKEN="$_SONAR_LOGIN" \
-          -e REPORT_PATH="/app/data/" \
-          -e SQ_PROJECTS="^$PROJECT_ID$" \
-          -v "$(pwd)":/app/data/ \
+          -e SQ_URL=$_SONAR_HOST_URL \
+          -e SQ_AUTH_TOKEN=$(cat /workspace/sonar-token.txt) \
+          -e REPORT_PATH=/app/data/ \
+          -e SQ_PROJECTS="^AccuKnox-Sonarqube-Usecase$" \
+          -v $(pwd):/app/data/ \
           accuknox/sastjob:latest
-
-  # Step 4: Upload generated files to Artifact Knowledge
+  # Step 5: Access the secret using gcloud and save it to a file
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args: [ 
+      '-c', 
+      "gcloud secrets versions access latest --secret=accuknox_token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/ak-token.txt" 
+    ]
+    id: 'access-secret'
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
       - '-c'
       - |
-        curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
-          --header "Tenant-Id: $_TENANT_ID" \
-          --header "Authorization: Bearer $_AK_TOK" \
-          --form "file=@/workspace/sonar-report.json"
-          done
-        fi
+        for file in $(ls -1 SQ-*.json); do
+          curl --location --request POST "https://$_AK_URL/api/v1/artifact/?tenant_id=$_TENANT_ID&data_type=SQ&save_to_s3=false" \
+            --header "Tenant-Id: $_TENANT_ID" \
+            --header "Authorization: Bearer $(cat /workspace/ak-token.txt)" \
+            --form "file=@\"$file\""
+        done
 
 substitutions:
   _SONAR_HOST_URL: "https://sq.accuknox.com/"
-  _SONAR_LOGIN: "squ_06875b545b725b69aca1a7f63cd254892c1a06ca"
-  _AK_URL: "https://cspm.demo.accuknox.com"
+  _AK_URL: "cspm.demo.accuknox.com"
   _TENANT_ID: "167"
-  _AK_TOK: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIwMzY4MTAwLCJqdGkiOiJhYzg0YjliYTgxNDE0NDk2YTQ2N2MyMDQzMzhhNmU5OCIsImlzcyI6ImNzcG0uZGVtby5hY2N1a25veC5jb20ifQ.OKrmduSHXWwH9t7edRnW4S--qccsZP-SY_8p97Z7Rvi-Rrn_OIGz0f8cJjuXXMkyAfKsEgviW5czxuBolz23oNUKZBlpYKoxe-ghMgMz3__-Zizw-izKii4WyFb3IcoLi0VMNh_HRxlxNN_-8DujXagFUQwgLTGmNz_zx_5aiMA1BFUnAYrjlrRL6q64_cJzPT6ip9I7tDDEWXgwJlVbtAlQvsqZxJVd39Lo4oK04Rwc5ehTz_lbw7_0VIgQkRCeiUhfKZj3OF4ie2sMfJm6BNtIP8wap_Nj-ORIRLyxeh84bBC7S_XTtgjkToEDJLSEd9BpLvLPcM8JqBSqx2Pa0Q"
 logsBucket: "gs://aditya-cicd-test"
